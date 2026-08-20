@@ -11,22 +11,20 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Http\Resources\Json\JsonResource;
 
 class AdminController extends Controller
 {
-    public function __construct()
+    protected function ensureAdmin(Request $request): void
     {
-        $this->middleware(function ($request, $next) {
-            if (! $request->user() || $request->user()->role !== 'admin') {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-            return $next($request);
-        });
+        if (! $request->user() || $request->user()->role !== 'admin') {
+            abort(403, 'Unauthorized');
+        }
     }
 
-    public function stats(): JsonResponse
+    public function stats(Request $request): JsonResponse
     {
+        $this->ensureAdmin($request);
+
         return response()->json([
             'total_users' => User::count(),
             'total_artists' => Artist::count(),
@@ -42,6 +40,8 @@ class AdminController extends Controller
 
     public function users(Request $request): AnonymousResourceCollection
     {
+        $this->ensureAdmin($request);
+
         $query = User::query();
 
         if ($request->has('role')) {
@@ -61,8 +61,10 @@ class AdminController extends Controller
         return \App\Http\Resources\UserResource::collection($users);
     }
 
-    public function banUser(User $user): JsonResponse
+    public function banUser(Request $request, User $user): JsonResponse
     {
+        $this->ensureAdmin($request);
+
         if ($user->role === 'admin') {
             return response()->json(['message' => 'Cannot ban an admin user'], 400);
         }
@@ -77,8 +79,10 @@ class AdminController extends Controller
         ]);
     }
 
-    public function deleteUser(User $user): JsonResponse
+    public function deleteUser(Request $request, User $user): JsonResponse
     {
+        $this->ensureAdmin($request);
+
         if ($user->role === 'admin') {
             return response()->json(['message' => 'Cannot delete an admin user'], 400);
         }
@@ -90,6 +94,8 @@ class AdminController extends Controller
 
     public function songs(Request $request): AnonymousResourceCollection
     {
+        $this->ensureAdmin($request);
+
         $query = Song::with(['artist', 'album', 'genres']);
 
         if ($request->has('search')) {
@@ -102,14 +108,18 @@ class AdminController extends Controller
         );
     }
 
-    public function deleteSong(Song $song): JsonResponse
+    public function deleteSong(Request $request, Song $song): JsonResponse
     {
+        $this->ensureAdmin($request);
+
         $song->delete();
         return response()->json(['message' => 'Song deleted successfully']);
     }
 
     public function artists(Request $request): AnonymousResourceCollection
     {
+        $this->ensureAdmin($request);
+
         $query = Artist::with(['user', 'songs', 'albums']);
 
         if ($request->has('search')) {
@@ -122,8 +132,10 @@ class AdminController extends Controller
         );
     }
 
-    public function verifyArtist(Artist $artist): JsonResponse
+    public function verifyArtist(Request $request, Artist $artist): JsonResponse
     {
+        $this->ensureAdmin($request);
+
         $artist->update(['verified' => ! $artist->verified]);
 
         return response()->json([
@@ -134,6 +146,8 @@ class AdminController extends Controller
 
     public function albums(Request $request): AnonymousResourceCollection
     {
+        $this->ensureAdmin($request);
+
         $query = Album::with(['artist', 'songs']);
 
         if ($request->has('search')) {
@@ -146,8 +160,10 @@ class AdminController extends Controller
         );
     }
 
-    public function deleteAlbum(Album $album): JsonResponse
+    public function deleteAlbum(Request $request, Album $album): JsonResponse
     {
+        $this->ensureAdmin($request);
+
         $album->delete();
         return response()->json(['message' => 'Album deleted successfully']);
     }
