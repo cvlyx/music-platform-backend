@@ -15,9 +15,9 @@ WORKDIR /var/www/html
 # Copy entire application
 COPY . .
 
-# Install dependencies (artisan now exists for post-autoload-dump)
+# Install dependencies
 RUN composer install --no-dev --no-interaction --optimize-autoloader
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"]
+CMD ["sh", "-c", "php artisan key:generate --force && php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=$PORT"]
