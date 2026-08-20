@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
 class Genre extends Model
@@ -25,8 +25,8 @@ class Genre extends Model
         });
     }
 
-    public function songs(): HasMany
+    public function songs(): BelongsToMany
     {
-        return $this->hasMany(Song::class, 'song_genres');
+        return $this->belongsToMany(Song::class, 'song_genres');
     }
 }
