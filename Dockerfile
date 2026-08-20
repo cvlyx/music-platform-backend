@@ -12,12 +12,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy composer files first for caching
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-interaction --optimize-autoloader
-
-# Copy application code
+# Copy entire application
 COPY . .
+
+# Install dependencies (artisan now exists for post-autoload-dump)
+RUN composer install --no-dev --no-interaction --optimize-autoloader
 
 EXPOSE 8000
 
