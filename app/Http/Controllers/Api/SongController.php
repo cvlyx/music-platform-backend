@@ -34,13 +34,15 @@ class SongController extends Controller
     {
         $song->incrementPlayCount();
 
-        $request->user()->recentlyPlayed()->create([
-            'song_id' => $song->id,
-            'played_at' => now(),
-        ]);
+        if ($request->user()) {
+            $request->user()->recentlyPlayed()->create([
+                'song_id' => $song->id,
+                'played_at' => now(),
+            ]);
+        }
 
         return response()->json([
-            'file_url' => asset('storage/'.$song->file_path),
+            'file_url' => $song->file_path,
             'duration' => $song->duration,
         ]);
     }

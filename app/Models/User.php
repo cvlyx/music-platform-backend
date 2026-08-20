@@ -48,6 +48,11 @@ class User extends Authenticatable
         return $this->hasOne(UserSubscription::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     protected function casts(): array
     {
         return [
@@ -55,6 +60,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'last_login_at' => 'datetime',
             'is_premium' => 'boolean',
+            'banned_at' => 'datetime',
         ];
     }
 }
